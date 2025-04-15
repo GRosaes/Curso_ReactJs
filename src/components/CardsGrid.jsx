@@ -1,36 +1,49 @@
-import Card from "./Card"; // Importa o componente Card
-
-// Recebe title, items (array) e cols (número) como props
-// Adiciona onAddToCart à lista de props recebidas
-const CardsGrid = ({ title, items, cols = 4, onAddToCart }) => { // Define cols=4 como padrão
-  // Define a classe de coluna do Bootstrap dinamicamente
-  // Ex: se cols=3, a classe será "row-cols-1 row-cols-md-3"
-  // Ajuste a lógica de responsividade conforme necessário
-  const colClass = `row-cols-1 row-cols-md-${Math.max(1, Math.floor(cols / 2))} row-cols-lg-${cols}`;
-  return (
-    <section className="mb-4"> {/* Adiciona margem inferior para separação */}
-      <h2>{title}</h2> {/* Exibe o título recebido via prop */}
-      <hr />
-      <div className={`row ${colClass} g-3`}> {/* Usa a classe de coluna dinâmica e espaçamento g-3 */}
-        {/* Mapeia o array 'items' recebido via prop */}
-        {items.map((item) => (
-          // Renderiza um Card para cada item, passando as props necessárias
-          // Assume que cada 'item' tem id, image, title, description
-          <Card
-            key={item.id}
-            image={item.image}
-            title={item.title}
-            description={item.description}
-            // Cria um link genérico, pode ser ajustado conforme a necessidade
-            link={`/item/${item.id}`}
-            // Passa a função onAddToCart para o Card, associando-a ao item específico
-            // Usamos uma arrow function para garantir que 'item' seja passado corretamente
-            // quando o botão no Card for clicado.
-            onAddToCartClick={() => onAddToCart(item)}
-          />
-        ))}
+const CardsGrid = ({ items = [], onAddToCart }) => {
+  if (!items || items.length === 0) {
+    return (
+      <div className="alert alert-info" role="alert">
+        <i className="bi bi-info-circle me-2"></i>
+        Nenhum produto encontrado.
       </div>
-    </section>
+    );
+  }
+
+  return (
+    <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+      {items.map((product) => (
+        <div key={product.id} className="col">
+          <div className="card h-100">
+            <img
+              src={product.img}
+              className="card-img-top"
+              alt={product.title}
+              style={{ height: '200px', objectFit: 'cover' }}
+              onError={(e) => {
+                e.target.src = 'https://via.placeholder.com/200x200?text=Produto';
+              }}
+            />
+            <div className="card-body">
+              <h5 className="card-title">{product.title}</h5>
+              <p className="card-text text-truncate">{product.description}</p>
+              <p className="card-text">
+                <strong>Preço: </strong>
+                {new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL'
+                }).format(product.price)}
+              </p>
+              <button
+                className="btn btn-primary w-100"
+                onClick={() => onAddToCart?.(product)}
+              >
+                <i className="bi bi-cart-plus me-2"></i>
+                Adicionar ao Carrinho
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 

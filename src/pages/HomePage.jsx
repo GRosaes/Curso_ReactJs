@@ -1,22 +1,39 @@
+import { useQuery } from "@tanstack/react-query";
 import CardsGrid from "../components/CardsGrid";
+import productService from "../services/productService";
 
-// Recebe a lista de produtos e a função onAddToCart como props
-const HomePage = ({ products, onAddToCart }) => {
-
-  // Simula produtos em destaque pegando os 3 primeiros
-  const featuredProducts = products.slice(0, 3);
+const HomePage = ({ onAddToCart }) => {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['featuredProducts'],
+    queryFn: () => productService.getProducts(1, 3),
+  });
 
   return (
     <div>
       <h1>Bem-vindo à Nossa Loja!</h1>
       <p>Confira nossos produtos em destaque:</p>
-      <CardsGrid
-        title="Destaques"
-        items={featuredProducts}
-        cols={3} // Exibe 3 colunas na home
-        onAddToCart={onAddToCart}
-      />
-      {/* Poderia adicionar mais seções aqui, como banners, etc. */}
+      
+      {isLoading ? (
+        <div className="text-center my-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Carregando...</span>
+          </div>
+        </div>
+      ) : isError ? (
+        <div className="alert alert-danger" role="alert">
+          <i className="bi bi-exclamation-triangle me-2"></i>
+          Erro ao carregar produtos.
+        </div>
+      ) : (
+        <CardsGrid
+          items={data?.products || []}
+          onAddToCart={onAddToCart}
+        />
+      )}
+      
+      <div className="mt-4 text-center">
+        <a href="/produtos" className="btn btn-primary">Ver todos os produtos</a>
+      </div>
     </div>
   );
 };
